@@ -32,6 +32,13 @@ export interface DashboardLinkResponse {
   dashboardUrl: string;
 }
 
+export interface EmailCheckResponse {
+  isRegistered: boolean;
+  accountId: string | null;
+  status: string;
+  name?: string;
+}
+
 class StripeApiClient {
   private baseURL: string;
 
@@ -59,6 +66,13 @@ class StripeApiClient {
   async getDashboardLink(accountId: string): Promise<DashboardLinkResponse> {
     const response = await axios.get(`${this.baseURL}/dashboard-link`, {
       params: { accountId }
+    });
+    return response.data;
+  }
+
+  async checkEmailRegistration(email: string): Promise<EmailCheckResponse> {
+    const response = await axios.get(`${this.baseURL}/check-email`, {
+      params: { email }
     });
     return response.data;
   }

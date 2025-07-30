@@ -126,4 +126,46 @@ public class StripeController {
                 .body(new DashboardLinkResponse("Internal server error"));
         }
     }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmailRegistration(@RequestParam String email) {
+        try {
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(new EmailCheckResponse(false, null, "Email is required"));
+            }
+
+            Coach existingCoach = stripeService.getCoachByEmail(email);
+            
+            if (existingCoach != null && existingCoach.getStripeAccountId() != null) {
+                // Check if onboarding is complete
+                try {
+                    Account account = stripeService.getAccountStatus(existingCoach.getStripeAccountId());
+                    boolean isOnboardingComplete = account.getDetailsSubmitted();
+                    
+                    return ResponseEntity.ok(new EmailCheckResponse(
+                        true, 
+                        existingCoach.getStripeAccountId(),
+                        isOnboardingComplete ? "complete" : "incomplete",
+                        existingCoach.getName()
+                    ));
+                } catch (StripeException e) {
+                    log.error("Failed to check account status for existing coach: {}", e.getMessage());
+                    return ResponseEntity.ok(new EmailCheckResponse(
+                        true, 
+                        existingCoach.getStripeAccountId(),
+                        "unknown",
+                        existingCoach.getName()
+                    ));
+                }
+            } else {
+                return ResponseEntity.ok(new EmailCheckResponse(false, null, "not_registered"));
+            }
+            
+        } catch (Exception e) {
+            log.error("Unexpected error checking email registration: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new EmailCheckResponse(false, null, "Internal server error"));
+        }
+    }
 }

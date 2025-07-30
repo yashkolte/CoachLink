@@ -36,19 +36,53 @@ export default function Home() {
     setSuccess('');
 
     try {
-      // Step 1: Create Stripe account
+      // Step 1: Check if email is already registered
+      const emailCheck = await stripeApi.checkEmailRegistration(formData.email);
+      
+      if (emailCheck.isRegistered) {
+        // User already exists - check onboarding status
+        if (emailCheck.status === 'complete') {
+          // Redirect to dashboard if onboarding is complete
+          setSuccess(`Welcome back, ${emailCheck.name || 'Coach'}! Redirecting to your dashboard...`);
+          
+          // Generate dashboard link and redirect
+          const dashboardResponse = await stripeApi.getDashboardLink(emailCheck.accountId!);
+          
+          setTimeout(() => {
+            window.location.href = dashboardResponse.dashboardUrl;
+          }, 2000);
+          
+          return;
+        } else if (emailCheck.status === 'incomplete') {
+          // Continue onboarding if incomplete
+          setSuccess(`Welcome back, ${emailCheck.name || 'Coach'}! Continuing your onboarding...`);
+          
+          // Generate onboarding link and redirect
+          const linkResponse = await stripeApi.generateOnboardingLink({
+            accountId: emailCheck.accountId!
+          });
+          
+          setTimeout(() => {
+            window.location.href = linkResponse.onboardingUrl;
+          }, 2000);
+          
+          return;
+        }
+      }
+
+      // Step 2: Create new Stripe account for new users
       const accountResponse = await stripeApi.createAccount(formData);
 
       // Store account ID in localStorage before redirecting
       localStorage.setItem('stripeAccountId', accountResponse.accountId);
       localStorage.setItem('coachId', accountResponse.coachId?.toString() || '');
 
-      // Step 2: Generate onboarding link
+      // Step 3: Generate onboarding link
       const linkResponse = await stripeApi.generateOnboardingLink({
         accountId: accountResponse.accountId
       });
 
-      // Step 3: Redirect to Stripe onboarding
+      // Step 4: Redirect to Stripe onboarding
       window.location.href = linkResponse.onboardingUrl;
 
     } catch (err: unknown) {
@@ -152,7 +186,7 @@ export default function Home() {
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 h-12"
               >
-                {loading ? 'Creating Account...' : 'Get Started with Stripe'}
+                {loading ? 'Checking Account...' : 'Continue with Stripe'}
               </Button>
             </form>
 
