@@ -46,7 +46,7 @@ public class StripeService {
         // Check if coach already exists
         Optional<Coach> existingCoach = coachRepository.findByEmail(email);
         if (existingCoach.isPresent() && existingCoach.get().getStripeAccountId() != null) {
-            log.info("Coach with email {} already has Stripe account: {}", 
+            log.info("Coach with email {} already has Stripe account: {}",
                     email, existingCoach.get().getStripeAccountId());
             return existingCoach.get().getStripeAccountId();
         }
@@ -57,18 +57,18 @@ public class StripeService {
                 .setEmail(email)
                 .setCountry("US")
                 .setCapabilities(
-                    AccountCreateParams.Capabilities.builder()
-                        .setTransfers(
-                            AccountCreateParams.Capabilities.Transfers.builder()
-                                .setRequested(true)
+                        AccountCreateParams.Capabilities.builder()
+                                .setTransfers(
+                                        AccountCreateParams.Capabilities.Transfers.builder()
+                                                .setRequested(true)
+                                                .build()
+                                )
                                 .build()
-                        )
-                        .build()
                 )
                 .build();
 
         Account account = Account.create(params);
-        
+
         // Save or update coach in database
         Coach coach;
         if (existingCoach.isPresent()) {
@@ -79,9 +79,9 @@ public class StripeService {
             coach = new Coach(email, name);
             coach.setStripeAccountId(account.getId());
         }
-        
+
         coachRepository.save(coach);
-        
+
         log.info("Created Stripe account {} for coach {}", account.getId(), email);
         return account.getId();
     }
@@ -100,16 +100,16 @@ public class StripeService {
                 .build();
 
         AccountLink accountLink = AccountLink.create(params);
-        
+
         log.info("Generated onboarding link for account {}", accountId);
         return accountLink.getUrl();
     }
 
     public Account getAccountStatus(String accountId) throws StripeException {
         initializeStripe();
-        
+
         Account account = Account.retrieve(accountId);
-        
+
         // Update coach status in database
         Optional<Coach> coachOpt = coachRepository.findByStripeAccountId(accountId);
         if (coachOpt.isPresent()) {
@@ -119,7 +119,7 @@ public class StripeService {
             coach.setUpdatedAt(LocalDateTime.now());
             coachRepository.save(coach);
         }
-        
+
         return account;
     }
 
@@ -130,7 +130,7 @@ public class StripeService {
                 .build();
 
         LoginLink loginLink = LoginLink.createOnAccount(accountId, params);
-        
+
         log.info("Generated dashboard link for account {}", accountId);
         return loginLink.getUrl();
     }

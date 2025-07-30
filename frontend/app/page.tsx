@@ -2,6 +2,15 @@
 
 import { useState } from 'react';
 import { stripeApi } from '../lib/stripe';
+import { BackgroundBeams } from '../components/ui/background-beams';
+import { TextGenerateEffect } from '../components/ui/text-generate-effect';
+import { Highlight } from '../components/ui/highlight';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Button } from '../components/ui/button';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Badge } from '../components/ui/badge';
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -56,84 +65,107 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">CoachLink</h1>
-          <p className="text-gray-600">Connect with corporate clients as a fitness coach</p>
-        </div>
+    <div className="min-h-screen bg-black relative flex items-center justify-center p-4 overflow-hidden">
+      <BackgroundBeams className="absolute inset-0" />
 
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-            Start Your Coaching Journey
-          </h2>
-
-          {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-              {success}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your full name"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your email address"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-3 px-4 rounded-md text-white font-medium ${loading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-                }`}
-            >
-              {loading ? 'Creating Account...' : 'Get Started with Stripe'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>
-              By signing up, you&apos;ll be redirected to Stripe to complete your onboarding
-              and set up payment processing.
-            </p>
+      <div className="max-w-md w-full space-y-8 relative z-10">
+        <div className="text-center space-y-4">
+          <TextGenerateEffect
+            words="CoachLink"
+            className="text-6xl font-bold text-white"
+          />
+          <p className="text-gray-300 text-lg">
+            Connect with <Highlight>corporate clients</Highlight> as a fitness coach
+          </p>
+          <div className="flex justify-center gap-2 mt-4">
+            <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">
+              Stripe Powered
+            </Badge>
+            <Badge variant="secondary" className="bg-green-500/20 text-green-300">
+              Secure
+            </Badge>
           </div>
         </div>
 
-        <div className="text-center text-sm text-gray-500">
+        <Card className="bg-black/50 border-gray-800 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-semibold text-white">
+              Start Your Coaching Journey
+            </CardTitle>
+            <CardDescription className="text-gray-400">
+              Join the marketplace and start earning with corporate clients
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {error && (
+              <Alert className="border-red-500/20 bg-red-500/10">
+                <AlertDescription className="text-red-300">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert className="border-green-500/20 bg-green-500/10">
+                <AlertDescription className="text-green-300">
+                  {success}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-gray-300">
+                  Full Name
+                </Label>
+                <Input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="bg-gray-900/50 border-gray-700 text-white placeholder-gray-500"
+                  placeholder="Enter your full name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-300">
+                  Email Address
+                </Label>
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="bg-gray-900/50 border-gray-700 text-white placeholder-gray-500"
+                  placeholder="Enter your email address"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 h-12"
+              >
+                {loading ? 'Creating Account...' : 'Get Started with Stripe'}
+              </Button>
+            </form>
+
+            <div className="text-center text-sm text-gray-500">
+              <p>
+                By signing up, you&apos;ll be redirected to Stripe to complete your onboarding
+                and set up payment processing.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="text-center text-sm text-gray-400">
           <p>Already have an account? Check your onboarding status in the dashboard.</p>
         </div>
       </div>

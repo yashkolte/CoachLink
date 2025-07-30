@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { stripeApi, AccountStatusResponse } from '../../../lib/stripe';
 import Link from 'next/link';
+import { BackgroundBeams } from '../../../components/ui/background-beams';
+import { TextGenerateEffect } from '../../../components/ui/text-generate-effect';
+import { SparklesCore } from '../../../components/ui/sparkles';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
+import { Alert, AlertDescription } from '../../../components/ui/alert';
+import { Badge } from '../../../components/ui/badge';
+import { CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function OnboardingComplete() {
     const searchParams = useSearchParams();
@@ -16,7 +24,7 @@ export default function OnboardingComplete() {
             try {
                 // Try to get account ID from URL params first, then localStorage
                 let accountId = searchParams.get('accountId');
-                
+
                 if (!accountId) {
                     accountId = localStorage.getItem('stripeAccountId');
                 }
@@ -28,7 +36,7 @@ export default function OnboardingComplete() {
                 }
 
                 console.log('Checking status for account:', accountId);
-                
+
                 const statusResponse = await stripeApi.checkAccountStatus(accountId);
                 setStatus(statusResponse);
 
@@ -54,10 +62,14 @@ export default function OnboardingComplete() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Checking your onboarding status...</p>
+            <div className="min-h-screen bg-black relative flex items-center justify-center">
+                <BackgroundBeams className="absolute inset-0" />
+                <div className="text-center relative z-10">
+                    <Loader2 className="h-12 w-12 animate-spin text-blue-400 mx-auto mb-4" />
+                    <TextGenerateEffect
+                        words="Checking your onboarding status..."
+                        className="text-xl text-gray-300"
+                    />
                 </div>
             </div>
         );
@@ -65,83 +77,140 @@ export default function OnboardingComplete() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-                    <div className="mb-4">
-                        <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+            <div className="min-h-screen bg-black relative flex items-center justify-center p-4">
+                <BackgroundBeams className="absolute inset-0" />
+                <Card className="max-w-md w-full bg-black/50 border-gray-800 backdrop-blur-sm relative z-10">
+                    <CardHeader className="text-center">
+                        <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+                            <XCircle className="w-8 h-8 text-red-400" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h1>
-                        <p className="text-gray-600 mb-6">{error}</p>
-                        <Link
-                            href="/"
-                            className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
-                        >
-                            Start Over
-                        </Link>
-                    </div>
-                </div>
+                        <CardTitle className="text-2xl font-bold text-white">
+                            Oops! Something went wrong
+                        </CardTitle>
+                        <CardDescription className="text-gray-400">
+                            {error}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-center">
+                        <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+                            <Link href="/">
+                                Start Over
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+        <div className="min-h-screen bg-black relative flex items-center justify-center p-4">
+            <BackgroundBeams className="absolute inset-0" />
+
+            {/* Sparkle effect for celebration */}
+            {status?.onboardingComplete && (
+                <div className="absolute inset-0 w-full h-full">
+                    <SparklesCore
+                        background="transparent"
+                        minSize={0.6}
+                        maxSize={1.4}
+                        particleDensity={100}
+                        className="w-full h-full"
+                        particleColor="#FFFFFF"
+                    />
+                </div>
+            )}
+
+            <Card className="max-w-md w-full bg-black/50 border-gray-800 backdrop-blur-sm relative z-10">
                 {status?.onboardingComplete ? (
                     <>
-                        <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to CoachLink!</h1>
-                        <p className="text-gray-600 mb-6">
-                            Your Stripe account has been successfully set up. You can now start receiving payments from corporate clients.
-                        </p>
-                        <div className="space-y-3">
-                            <Link
-                                href="/dashboard"
-                                className="block w-full bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
-                            >
-                                Go to Dashboard
-                            </Link>
-                            <div className="text-sm text-gray-500">
-                                <p>Account ID: {status.accountId}</p>
-                                <p>Details Submitted: ✅</p>
-                                <p>Payouts Enabled: {status.payoutsEnabled ? '✅' : '⏳ Pending'}</p>
+                        <CardHeader className="text-center">
+                            <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+                                <CheckCircle className="w-8 h-8 text-green-400" />
                             </div>
-                        </div>
+                            <TextGenerateEffect
+                                words="Welcome to CoachLink!"
+                                className="text-2xl font-bold text-white"
+                            />
+                            <CardDescription className="text-gray-400 mt-4">
+                                Your Stripe account has been successfully set up. You can now start receiving payments from corporate clients.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                            <Button asChild className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+                                <Link href="/dashboard">
+                                    Go to Dashboard
+                                </Link>
+                            </Button>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-400">Account ID:</span>
+                                    <Badge variant="secondary" className="bg-gray-700 text-gray-300">
+                                        {status.accountId}
+                                    </Badge>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-400">Details Submitted:</span>
+                                    <Badge className="bg-green-500/20 text-green-400">
+                                        ✅ Complete
+                                    </Badge>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-400">Payouts Enabled:</span>
+                                    <Badge className={status.payoutsEnabled ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}>
+                                        {status.payoutsEnabled ? '✅ Enabled' : '⏳ Pending'}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </CardContent>
                     </>
                 ) : (
                     <>
-                        <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-                            <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                            </svg>
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Onboarding Incomplete</h1>
-                        <p className="text-gray-600 mb-6">
-                            It looks like your Stripe onboarding isn&apos;t complete yet. You may need to provide additional information.
-                        </p>
-                        <div className="space-y-3">
-                            <Link
-                                href="/onboarding/refresh"
-                                className="block w-full bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
-                            >
-                                Complete Onboarding
-                            </Link>
-                            <div className="text-sm text-gray-500">
-                                <p>Account ID: {status?.accountId}</p>
-                                <p>Details Submitted: {status?.detailsSubmitted ? '✅' : '❌'}</p>
-                                <p>Payouts Enabled: {status?.payoutsEnabled ? '✅' : '❌'}</p>
+                        <CardHeader className="text-center">
+                            <div className="mx-auto w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mb-4">
+                                <AlertCircle className="w-8 h-8 text-yellow-400" />
                             </div>
-                        </div>
+                            <CardTitle className="text-2xl font-bold text-white">
+                                Onboarding Incomplete
+                            </CardTitle>
+                            <CardDescription className="text-gray-400">
+                                It looks like your Stripe onboarding isn&apos;t complete yet. You may need to provide additional information.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                            <Button asChild className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700">
+                                <Link href="/onboarding/refresh">
+                                    Complete Onboarding
+                                </Link>
+                            </Button>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-400">Account ID:</span>
+                                    <Badge variant="secondary" className="bg-gray-700 text-gray-300">
+                                        {status?.accountId}
+                                    </Badge>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-400">Details Submitted:</span>
+                                    <Badge className={status?.detailsSubmitted ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>
+                                        {status?.detailsSubmitted ? '✅ Complete' : '❌ Incomplete'}
+                                    </Badge>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-400">Payouts Enabled:</span>
+                                    <Badge className={status?.payoutsEnabled ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>
+                                        {status?.payoutsEnabled ? '✅ Enabled' : '❌ Disabled'}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </CardContent>
                     </>
                 )}
-            </div>
+            </Card>
         </div>
     );
 }

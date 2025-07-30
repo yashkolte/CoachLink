@@ -30,6 +30,7 @@ public class InMemoryDatabaseConfig {
     }
 
     public static class InMemoryCoachRepository implements CoachRepository {
+
         private final ConcurrentHashMap<String, Coach> coaches = new ConcurrentHashMap<>();
         private final AtomicLong idGenerator = new AtomicLong(1);
 
@@ -162,8 +163,8 @@ public class InMemoryDatabaseConfig {
         }
 
         @Override
-        public <S extends Coach, R> R findBy(Example<S> example, 
-                                             Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+        public <S extends Coach, R> R findBy(Example<S> example,
+                Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
             return queryFunction.apply(null);
         }
 
