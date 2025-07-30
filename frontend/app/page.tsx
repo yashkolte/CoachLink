@@ -30,6 +30,10 @@ export default function Home() {
       // Step 1: Create Stripe account
       const accountResponse = await stripeApi.createAccount(formData);
 
+      // Store account ID in localStorage before redirecting
+      localStorage.setItem('stripeAccountId', accountResponse.accountId);
+      localStorage.setItem('coachId', accountResponse.coachId?.toString() || '');
+
       // Step 2: Generate onboarding link
       const linkResponse = await stripeApi.generateOnboardingLink({
         accountId: accountResponse.accountId

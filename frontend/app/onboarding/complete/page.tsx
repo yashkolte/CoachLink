@@ -14,8 +14,12 @@ export default function OnboardingComplete() {
     useEffect(() => {
         const checkOnboardingStatus = async () => {
             try {
-                // Get account ID from URL params (you might need to store this in localStorage or session)
-                const accountId = searchParams.get('accountId') || localStorage.getItem('stripeAccountId');
+                // Try to get account ID from URL params first, then localStorage
+                let accountId = searchParams.get('accountId');
+                
+                if (!accountId) {
+                    accountId = localStorage.getItem('stripeAccountId');
+                }
 
                 if (!accountId) {
                     setError('No account ID found. Please start the onboarding process again.');
@@ -23,11 +27,19 @@ export default function OnboardingComplete() {
                     return;
                 }
 
+                console.log('Checking status for account:', accountId);
+                
                 const statusResponse = await stripeApi.checkAccountStatus(accountId);
                 setStatus(statusResponse);
 
                 // Store account ID for future reference
                 localStorage.setItem('stripeAccountId', accountId);
+
+                // If onboarding is complete, you might want to clear the stored account ID
+                // or redirect to dashboard
+                if (statusResponse.onboardingComplete) {
+                    console.log('Onboarding completed successfully!');
+                }
 
             } catch (err) {
                 console.error('Error checking status:', err);

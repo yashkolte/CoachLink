@@ -89,10 +89,13 @@ public class StripeService {
     public String generateOnboardingLink(String accountId) throws StripeException {
         initializeStripe();
 
+        // Include account ID in the return URL
+        String returnUrlWithAccountId = returnUrl + "?accountId=" + accountId;
+
         AccountLinkCreateParams params = AccountLinkCreateParams.builder()
                 .setAccount(accountId)
                 .setRefreshUrl(refreshUrl)
-                .setReturnUrl(returnUrl)
+                .setReturnUrl(returnUrlWithAccountId)
                 .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
                 .build();
 
