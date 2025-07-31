@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { stripeApi } from '../lib/stripe';
+import { getErrorMessage } from '../lib/utils';
 import { BackgroundBeams } from '../components/ui/background-beams';
 import { TextGenerateEffect } from '../components/ui/text-generate-effect';
 import { Highlight } from '../components/ui/highlight';
@@ -38,44 +39,40 @@ export default function Home() {
     try {
       // Step 1: Check if email is already registered
       const emailCheck = await stripeApi.checkEmailRegistration(formData.email);
-      
+
       if (emailCheck.isRegistered) {
         // User already exists - check onboarding status
         if (emailCheck.status === 'complete') {
           // Redirect to dashboard if onboarding is complete
           setSuccess(`Welcome back, ${emailCheck.name || 'Coach'}! Redirecting to your dashboard...`);
-          
+
           // Generate dashboard link and redirect
           const dashboardResponse = await stripeApi.getDashboardLink(emailCheck.accountId!);
-          
+
           setTimeout(() => {
             window.location.href = dashboardResponse.dashboardUrl;
           }, 2000);
-          
+
           return;
         } else if (emailCheck.status === 'incomplete') {
           // Continue onboarding if incomplete
           setSuccess(`Welcome back, ${emailCheck.name || 'Coach'}! Continuing your onboarding...`);
-          
+
           // Generate onboarding link and redirect
           const linkResponse = await stripeApi.generateOnboardingLink({
             accountId: emailCheck.accountId!
           });
-          
+
           setTimeout(() => {
             window.location.href = linkResponse.onboardingUrl;
           }, 2000);
-          
+
           return;
         }
       }
 
       // Step 2: Create new Stripe account for new users
       const accountResponse = await stripeApi.createAccount(formData);
-
-      // Store account ID in localStorage before redirecting
-      localStorage.setItem('stripeAccountId', accountResponse.accountId);
-      localStorage.setItem('coachId', accountResponse.coachId?.toString() || '');
 
       // Step 3: Generate onboarding link
       const linkResponse = await stripeApi.generateOnboardingLink({
@@ -87,12 +84,7 @@ export default function Home() {
 
     } catch (err: unknown) {
       console.error('Error during signup:', err);
-      let errorMessage = 'Failed to create account. Please try again.';
-      if (err && typeof err === 'object' && 'response' in err) {
-        const response = (err as { response?: { data?: { message?: string } } }).response;
-        errorMessage = response?.data?.message || errorMessage;
-      }
-      setError(errorMessage);
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -198,10 +190,6 @@ export default function Home() {
             </div>
           </CardContent>
         </Card>
-
-        <div className="text-center text-sm text-gray-400">
-          <p>Already have an account? Check your onboarding status in the dashboard.</p>
-        </div>
       </div>
     </div>
   );

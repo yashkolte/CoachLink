@@ -135,10 +135,6 @@ public class StripeService {
         return loginLink.getUrl();
     }
 
-    public Coach getCoachByAccountId(String accountId) {
-        return coachRepository.findByStripeAccountId(accountId).orElse(null);
-    }
-
     public Coach getCoachByEmail(String email) {
         return coachRepository.findByEmail(email).orElse(null);
     }

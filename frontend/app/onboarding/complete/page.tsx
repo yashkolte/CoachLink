@@ -35,19 +35,11 @@ export default function OnboardingComplete() {
                     return;
                 }
 
-                console.log('Checking status for account:', accountId);
-
                 const statusResponse = await stripeApi.checkAccountStatus(accountId);
                 setStatus(statusResponse);
 
                 // Store account ID for future reference
                 localStorage.setItem('stripeAccountId', accountId);
-
-                // If onboarding is complete, you might want to clear the stored account ID
-                // or redirect to dashboard
-                if (statusResponse.onboardingComplete) {
-                    console.log('Onboarding completed successfully!');
-                }
 
             } catch (err) {
                 console.error('Error checking status:', err);
