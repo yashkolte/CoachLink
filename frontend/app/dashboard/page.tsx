@@ -102,7 +102,7 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-black relative">
+        <div className="min-h-screen bg-black relative pt-16">
             <BackgroundBeams className="absolute inset-0" />
 
             <div className="container mx-auto px-4 py-8 relative z-10">

@@ -2,41 +2,24 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
-export interface CreateAccountRequest {
+export interface CoachRequest {
   email: string;
   name: string;
 }
 
-export interface CreateAccountResponse {
-  accountId: string;
-  coachId: string;
-  message: string;
-}
-
-export interface OnboardingLinkRequest {
-  accountId: string;
-}
-
-export interface OnboardingLinkResponse {
-  onboardingUrl: string;
-}
-
-export interface AccountStatusResponse {
-  accountId: string;
-  detailsSubmitted: boolean;
-  payoutsEnabled: boolean;
-  onboardingComplete: boolean;
-}
-
-export interface DashboardLinkResponse {
-  dashboardUrl: string;
-}
-
-export interface EmailCheckResponse {
-  isRegistered: boolean;
+export interface CoachResponse {
+  id: string | null;
+  email: string;
+  name: string | null;
   accountId: string | null;
   status: string;
-  name?: string;
+  isRegistered: boolean;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }
 
 class StripeApiClient {
@@ -46,35 +29,40 @@ class StripeApiClient {
     this.baseURL = `${API_BASE_URL}/stripe`;
   }
 
-  async createAccount(data: CreateAccountRequest): Promise<CreateAccountResponse> {
+  async createAccount(data: CoachRequest): Promise<CoachResponse> {
     const response = await axios.post(`${this.baseURL}/create-account`, data);
-    return response.data;
+    return response.data.data; // Extract data from ApiResponse
   }
 
-  async generateOnboardingLink(data: OnboardingLinkRequest): Promise<OnboardingLinkResponse> {
+  async generateOnboardingLink(data: { accountId: string }): Promise<{ onboardingUrl: string }> {
     const response = await axios.post(`${this.baseURL}/generate-onboarding-link`, data);
-    return response.data;
+    return response.data.data; // Extract data from ApiResponse
   }
 
-  async checkAccountStatus(accountId: string): Promise<AccountStatusResponse> {
+  async checkAccountStatus(accountId: string): Promise<{
+    accountId: string;
+    detailsSubmitted: boolean;
+    payoutsEnabled: boolean;
+    onboardingComplete: boolean;
+  }> {
     const response = await axios.get(`${this.baseURL}/check-status`, {
       params: { accountId }
     });
-    return response.data;
+    return response.data.data; // Extract data from ApiResponse
   }
 
-  async getDashboardLink(accountId: string): Promise<DashboardLinkResponse> {
+  async getDashboardLink(accountId: string): Promise<{ dashboardUrl: string }> {
     const response = await axios.get(`${this.baseURL}/dashboard-link`, {
       params: { accountId }
     });
-    return response.data;
+    return response.data.data; // Extract data from ApiResponse
   }
 
-  async checkEmailRegistration(email: string): Promise<EmailCheckResponse> {
+  async checkEmailRegistration(email: string): Promise<CoachResponse> {
     const response = await axios.get(`${this.baseURL}/check-email`, {
       params: { email }
     });
-    return response.data;
+    return response.data.data; // Extract data from ApiResponse
   }
 }
 

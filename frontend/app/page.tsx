@@ -37,76 +37,36 @@ export default function Home() {
     setSuccess('');
 
     try {
-      // Step 1: Check if email is already registered
-      const emailCheck = await stripeApi.checkEmailRegistration(formData.email);
-
-      if (emailCheck.isRegistered) {
-        // User already exists - check onboarding status
-        if (emailCheck.status === 'complete') {
-          // Redirect to dashboard if onboarding is complete
-          setSuccess(`Welcome back, ${emailCheck.name || 'Coach'}! Redirecting to your dashboard...`);
-
-          // Generate dashboard link and redirect
-          const dashboardResponse = await stripeApi.getDashboardLink(emailCheck.accountId!);
-
-          setTimeout(() => {
-            window.location.href = dashboardResponse.dashboardUrl;
-          }, 2000);
-
-          return;
-        } else if (emailCheck.status === 'incomplete') {
-          // Continue onboarding if incomplete
-          setSuccess(`Welcome back, ${emailCheck.name || 'Coach'}! Continuing your onboarding...`);
-
-          // Generate onboarding link and redirect
-          const linkResponse = await stripeApi.generateOnboardingLink({
-            accountId: emailCheck.accountId!
-          });
-
-          setTimeout(() => {
-            window.location.href = linkResponse.onboardingUrl;
-          }, 2000);
-
-          return;
-        }
-      }
-
-      // Step 2: Create new Stripe account for new users
+      // Create account or get existing account info
       const accountResponse = await stripeApi.createAccount(formData);
 
-      // Check if account already existed
-      if (accountResponse.message === "Account already exists and is complete") {
-        // Account exists and is complete - redirect to dashboard
-        setSuccess(`Welcome back! Your account is ready. Redirecting to dashboard...`);
+      // Handle different account states based on backend response
+      if (accountResponse.status === 'complete') {
+        // Account exists and onboarding is complete - redirect to dashboard
+        setSuccess(`Welcome back, ${accountResponse.name || 'Coach'}! Redirecting to your dashboard...`);
         
-        const dashboardResponse = await stripeApi.getDashboardLink(accountResponse.accountId);
+        const dashboardResponse = await stripeApi.getDashboardLink(accountResponse.accountId!);
         setTimeout(() => {
           window.location.href = dashboardResponse.dashboardUrl;
         }, 2000);
         
         return;
-      } else if (accountResponse.message === "Account exists, please complete onboarding") {
-        // Account exists but incomplete - continue onboarding
-        setSuccess(`Welcome back! Continuing your onboarding process...`);
+      } else {
+        // Account is new or incomplete - redirect to onboarding
+        const message = accountResponse.status === 'incomplete' && accountResponse.isRegistered 
+          ? `Welcome back, ${accountResponse.name || 'Coach'}! Continuing your onboarding...`
+          : `Welcome ${formData.name}! Setting up your Stripe account...`;
+        
+        setSuccess(message);
         
         const linkResponse = await stripeApi.generateOnboardingLink({
-          accountId: accountResponse.accountId
+          accountId: accountResponse.accountId!
         });
         
         setTimeout(() => {
           window.location.href = linkResponse.onboardingUrl;
         }, 2000);
-        
-        return;
       }
-
-      // Step 3: Generate onboarding link for new accounts
-      const linkResponse = await stripeApi.generateOnboardingLink({
-        accountId: accountResponse.accountId
-      });
-
-      // Step 4: Redirect to Stripe onboarding
-      window.location.href = linkResponse.onboardingUrl;
 
     } catch (err: unknown) {
       console.error('Error during signup:', err);
