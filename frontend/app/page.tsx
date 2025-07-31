@@ -74,7 +74,33 @@ export default function Home() {
       // Step 2: Create new Stripe account for new users
       const accountResponse = await stripeApi.createAccount(formData);
 
-      // Step 3: Generate onboarding link
+      // Check if account already existed
+      if (accountResponse.message === "Account already exists and is complete") {
+        // Account exists and is complete - redirect to dashboard
+        setSuccess(`Welcome back! Your account is ready. Redirecting to dashboard...`);
+        
+        const dashboardResponse = await stripeApi.getDashboardLink(accountResponse.accountId);
+        setTimeout(() => {
+          window.location.href = dashboardResponse.dashboardUrl;
+        }, 2000);
+        
+        return;
+      } else if (accountResponse.message === "Account exists, please complete onboarding") {
+        // Account exists but incomplete - continue onboarding
+        setSuccess(`Welcome back! Continuing your onboarding process...`);
+        
+        const linkResponse = await stripeApi.generateOnboardingLink({
+          accountId: accountResponse.accountId
+        });
+        
+        setTimeout(() => {
+          window.location.href = linkResponse.onboardingUrl;
+        }, 2000);
+        
+        return;
+      }
+
+      // Step 3: Generate onboarding link for new accounts
       const linkResponse = await stripeApi.generateOnboardingLink({
         accountId: accountResponse.accountId
       });

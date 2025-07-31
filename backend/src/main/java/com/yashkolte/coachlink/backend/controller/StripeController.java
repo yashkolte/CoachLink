@@ -42,6 +42,46 @@ public class StripeController {
                         .body(new CreateAccountResponse(null, null, "Email is required"));
             }
 
+            // First, check if email already exists
+            Coach existingCoach = stripeService.getCoachByEmail(request.getEmail());
+            
+            if (existingCoach != null && existingCoach.getStripeAccountId() != null) {
+                // Coach already exists with Stripe account
+                try {
+                    Account account = stripeService.getAccountStatus(existingCoach.getStripeAccountId());
+                    boolean isOnboardingComplete = account.getDetailsSubmitted();
+                    
+                    if (isOnboardingComplete) {
+                        // Account exists and onboarding is complete - return existing account info
+                        log.info("Email {} already has completed account, returning existing account: {}", 
+                                request.getEmail(), existingCoach.getStripeAccountId());
+                        return ResponseEntity.ok(new CreateAccountResponse(
+                                existingCoach.getStripeAccountId(),
+                                existingCoach.getId(),
+                                "Account already exists and is complete"
+                        ));
+                    } else {
+                        // Account exists but onboarding incomplete - return existing account for onboarding
+                        log.info("Email {} has incomplete account, returning for onboarding: {}", 
+                                request.getEmail(), existingCoach.getStripeAccountId());
+                        return ResponseEntity.ok(new CreateAccountResponse(
+                                existingCoach.getStripeAccountId(),
+                                existingCoach.getId(),
+                                "Account exists, please complete onboarding"
+                        ));
+                    }
+                } catch (StripeException e) {
+                    log.error("Failed to check account status for existing coach: {}", e.getMessage());
+                    // If we can't check status, treat as incomplete and allow onboarding
+                    return ResponseEntity.ok(new CreateAccountResponse(
+                            existingCoach.getStripeAccountId(),
+                            existingCoach.getId(),
+                            "Account exists, please complete onboarding"
+                    ));
+                }
+            }
+
+            // Email doesn't exist, create new account
             String accountId = stripeService.createStripeAccount(request.getEmail(), request.getName());
             Coach coach = stripeService.getCoachByEmail(request.getEmail());
 
@@ -180,6 +220,50 @@ public class StripeController {
             log.error("Unexpected error checking email registration: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new EmailCheckResponse(false, null, "Internal server error"));
+        }
+    }
+
+    @GetMapping("/list-all-coaches")
+    public ResponseEntity<?> listAllCoaches() {
+        try {
+            // Get all coaches from database
+            java.util.List<Coach> allCoaches = stripeService.getAllCoaches();
+            
+            java.util.List<java.util.Map<String, Object>> coachInfo = new java.util.ArrayList<>();
+            
+            for (Coach coach : allCoaches) {
+                java.util.Map<String, Object> info = new java.util.HashMap<>();
+                info.put("email", coach.getEmail());
+                info.put("name", coach.getName());
+                info.put("accountId", coach.getStripeAccountId());
+                
+                if (coach.getStripeAccountId() != null) {
+                    try {
+                        Account account = stripeService.getAccountStatus(coach.getStripeAccountId());
+                        info.put("onboardingComplete", account.getDetailsSubmitted());
+                        info.put("payoutsEnabled", account.getPayoutsEnabled());
+                        info.put("status", account.getDetailsSubmitted() ? "complete" : "incomplete");
+                    } catch (StripeException e) {
+                        info.put("status", "error_checking_stripe");
+                        info.put("error", e.getMessage());
+                    }
+                } else {
+                    info.put("status", "no_stripe_account");
+                }
+                
+                coachInfo.add(info);
+            }
+            
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("totalCoaches", allCoaches.size());
+            response.put("coaches", coachInfo);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Error listing all coaches: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("error", "Failed to retrieve coaches"));
         }
     }
 }

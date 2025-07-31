@@ -43,14 +43,6 @@ public class StripeService {
     public String createStripeAccount(String email, String name) throws StripeException {
         initializeStripe();
 
-        // Check if coach already exists
-        Optional<Coach> existingCoach = coachRepository.findByEmail(email);
-        if (existingCoach.isPresent() && existingCoach.get().getStripeAccountId() != null) {
-            log.info("Coach with email {} already has Stripe account: {}",
-                    email, existingCoach.get().getStripeAccountId());
-            return existingCoach.get().getStripeAccountId();
-        }
-
         // Create Stripe Express account
         AccountCreateParams params = AccountCreateParams.builder()
                 .setType(AccountCreateParams.Type.EXPRESS)
@@ -69,7 +61,8 @@ public class StripeService {
 
         Account account = Account.create(params);
 
-        // Save or update coach in database
+        // Create or update coach in database
+        Optional<Coach> existingCoach = coachRepository.findByEmail(email);
         Coach coach;
         if (existingCoach.isPresent()) {
             coach = existingCoach.get();
@@ -137,5 +130,9 @@ public class StripeService {
 
     public Coach getCoachByEmail(String email) {
         return coachRepository.findByEmail(email).orElse(null);
+    }
+
+    public java.util.List<Coach> getAllCoaches() {
+        return coachRepository.findAll();
     }
 }
