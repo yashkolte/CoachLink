@@ -19,17 +19,16 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * MongoDB Configuration for CoachLink Application
- * 
- * This configuration class sets up the MongoDB connection with optimized settings
- * for production use with MongoDB Atlas. It includes:
- * - SSL/TLS configuration for secure connections
- * - Connection pooling for performance optimization
- * - Timeout configurations for reliability
- * - Fallback mechanism for connection issues
- * 
+ *
+ * This configuration class sets up the MongoDB connection with optimized
+ * settings for production use with MongoDB Atlas. It includes: - SSL/TLS
+ * configuration for secure connections - Connection pooling for performance
+ * optimization - Timeout configurations for reliability - Fallback mechanism
+ * for connection issues
+ *
  * The configuration is specifically tuned for MongoDB Atlas cloud deployment
  * with proper security and performance considerations.
- * 
+ *
  * @author Yash Kolte
  * @version 1.0
  * @since 2024
@@ -39,16 +38,16 @@ import java.util.concurrent.TimeUnit;
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
     /**
-     * MongoDB connection URI injected from application properties
-     * Should contain full Atlas connection string with credentials
+     * MongoDB connection URI injected from application properties Should
+     * contain full Atlas connection string with credentials
      */
     @Value("${spring.data.mongodb.uri}")
     private String connectionString;
 
     /**
-     * Database name for the CoachLink application
-     * All collections will be created under this database
-     * 
+     * Database name for the CoachLink application All collections will be
+     * created under this database
+     *
      * @return The database name "coachlink"
      */
     @Override
@@ -58,20 +57,19 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     /**
      * Configure and create MongoDB client with optimized settings
-     * 
-     * This method creates a MongoDB client with:
-     * - SSL/TLS encryption for secure communication
-     * - Connection pooling for better performance
-     * - Appropriate timeouts for reliability
-     * - Fallback mechanism for connection failures
-     * 
+     *
+     * This method creates a MongoDB client with: - SSL/TLS encryption for
+     * secure communication - Connection pooling for better performance -
+     * Appropriate timeouts for reliability - Fallback mechanism for connection
+     * failures
+     *
      * @return Configured MongoClient instance
      */
     @Override
     public MongoClient mongoClient() {
         try {
             log.info("Configuring MongoDB client with SSL and connection pooling");
-            
+
             // Create SSL context for secure connections
             // Note: In production, consider using proper certificate validation
             TrustManager[] trustAllCerts = new TrustManager[]{
@@ -104,22 +102,22 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
                     })
                     // Connection Pool Configuration for Performance
                     .applyToConnectionPoolSettings(builder -> {
-                        builder.maxSize(20)              // Maximum connections in pool
-                                .minSize(5)               // Minimum connections maintained
-                                .maxWaitTime(10, TimeUnit.SECONDS)        // Max wait for connection
-                                .maxConnectionIdleTime(120, TimeUnit.SECONDS)  // Idle timeout
+                        builder.maxSize(20) // Maximum connections in pool
+                                .minSize(5) // Minimum connections maintained
+                                .maxWaitTime(10, TimeUnit.SECONDS) // Max wait for connection
+                                .maxConnectionIdleTime(120, TimeUnit.SECONDS) // Idle timeout
                                 .maxConnectionLifeTime(120, TimeUnit.SECONDS); // Connection lifetime
                     })
                     // Socket Configuration for Reliability
                     .applyToSocketSettings(builder -> {
-                        builder.connectTimeout(10, TimeUnit.SECONDS)  // Connection timeout
+                        builder.connectTimeout(10, TimeUnit.SECONDS) // Connection timeout
                                 .readTimeout(10, TimeUnit.SECONDS);    // Read timeout
                     })
                     .build();
 
             log.info("MongoDB client configured successfully");
             return MongoClients.create(settings);
-            
+
         } catch (Exception e) {
             log.warn("Failed to configure SSL MongoDB client, falling back to default: {}", e.getMessage());
             // Fallback to default client if SSL configuration fails
@@ -129,10 +127,10 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     /**
      * Create MongoTemplate bean for database operations
-     * 
+     *
      * MongoTemplate provides a high-level abstraction for MongoDB operations
      * and is used by Spring Data MongoDB repositories.
-     * 
+     *
      * @return Configured MongoTemplate instance
      */
     @Bean

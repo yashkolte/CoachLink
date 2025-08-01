@@ -1,47 +1,56 @@
 # CoachLink - Stripe Express Account Onboarding Flow
 
 ## Overview
+
 Simple and streamlined onboarding experience for fitness coaches to set up their Stripe Express accounts and start receiving payments through the CoachLink marketplace.
 
 ## 🚀 Quick Start
 
 ### Backend (Port 8080)
+
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
 
 ### Frontend (Port 3000)
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 ### Access the Onboarding Flow
+
 Visit: **http://localhost:3000/coach-onboarding**
 
 ## 📋 Onboarding Process
 
 ### Step 1: Sign Up / Sign In
+
 - Enter email address (required)
 - Enter full name (required for new accounts)
 - System checks if email already exists
 
 ### Step 2: Account Creation
+
 - If new user: Creates Stripe Express account automatically
 - If existing user: Retrieves existing account status
 
 ### Step 3: Stripe Onboarding
+
 - Redirects to Stripe's hosted onboarding flow
 - Coach completes required business information
 - Stripe handles verification and compliance
 
 ### Step 4: Return & Verification
+
 - Coach returns to CoachLink automatically
 - System verifies onboarding completion
 - Generates dashboard access link
 
 ### Step 5: Dashboard Access
+
 - Coach can access Stripe Express dashboard
 - Dashboard shows payment settings, payouts, reports
 - Ready to receive payments from corporate clients
@@ -49,6 +58,7 @@ Visit: **http://localhost:3000/coach-onboarding**
 ## 🔧 Technical Implementation
 
 ### Backend Features
+
 - **Email Validation**: Prevents duplicate account creation
 - **Account Status Tracking**: Monitors onboarding progress
 - **Stripe Integration**: Full Express account management
@@ -56,12 +66,14 @@ Visit: **http://localhost:3000/coach-onboarding**
 - **Error Handling**: Graceful fallbacks and error recovery
 
 ### Frontend Features
+
 - **Progressive UI**: Step-by-step guided experience
 - **Real-time Feedback**: Loading states and progress indicators
 - **Smart Routing**: Automatic navigation based on account status
 - **Mobile Responsive**: Works on all device sizes
 
 ### Database Architecture
+
 - **Primary**: MongoDB Atlas (Cloud)
 - **Fallback**: In-memory database for reliability
 - **Collections**: Coaches with Stripe account relationships
@@ -69,18 +81,21 @@ Visit: **http://localhost:3000/coach-onboarding**
 ## 🎯 Key Features
 
 ### For New Coaches
+
 1. **Quick Setup**: Enter email + name → Ready in minutes
 2. **Guided Process**: Clear steps with visual progress
 3. **No Technical Knowledge Required**: Stripe handles complexity
 4. **Instant Access**: Dashboard available immediately after completion
 
 ### For Returning Coaches
+
 1. **Smart Detection**: Automatic account recognition
 2. **Status Awareness**: Knows if onboarding is complete
 3. **Direct Access**: Skip to dashboard if already set up
 4. **Resume Capability**: Continue incomplete onboarding
 
 ### For Platform (CoachLink)
+
 1. **No Duplicate Accounts**: Email-based validation
 2. **Complete Audit Trail**: All actions logged
 3. **Stripe Compliance**: Meets all regulatory requirements
@@ -89,6 +104,7 @@ Visit: **http://localhost:3000/coach-onboarding**
 ## 📊 Database Schema
 
 ### Coach Entity
+
 ```java
 @Document(collection = "coaches")
 public class Coach {
@@ -106,18 +122,23 @@ public class Coach {
 ## 🔗 API Endpoints
 
 ### POST `/api/stripe/create-account`
+
 Creates new Stripe Express account or returns existing
 
 ### POST `/api/stripe/generate-onboarding-link`
+
 Generates Stripe onboarding URL with return handling
 
 ### GET `/api/stripe/check-status`
+
 Checks current onboarding and account status
 
 ### GET `/api/stripe/dashboard-link`
+
 Generates Stripe Express dashboard access URL
 
 ### GET `/api/stripe/check-email`
+
 Validates if email is already registered
 
 ## 🌟 Success Flow Example
@@ -149,6 +170,7 @@ Validates if email is already registered
 ## 📱 Mobile Support
 
 The onboarding flow is fully responsive and works seamlessly on:
+
 - Desktop browsers
 - Mobile phones (iOS/Android)
 - Tablets
@@ -157,6 +179,7 @@ The onboarding flow is fully responsive and works seamlessly on:
 ## 🚀 Production Ready
 
 This implementation includes:
+
 - **Security**: HTTPS, CORS, input validation
 - **Performance**: Optimized API calls, caching
 - **Monitoring**: Comprehensive logging

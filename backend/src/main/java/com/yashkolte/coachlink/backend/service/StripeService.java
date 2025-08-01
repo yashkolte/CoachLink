@@ -20,15 +20,13 @@ import java.util.Optional;
 
 /**
  * Service class for handling Stripe Express account operations
- * 
- * This service manages the integration between CoachLink coaches and Stripe Express accounts.
- * It handles:
- * - Creating Stripe Express accounts for coaches
- * - Generating onboarding links for account setup
- * - Checking account status and onboarding progress
- * - Creating dashboard links for account management
- * - Synchronizing Stripe account data with local database
- * 
+ *
+ * This service manages the integration between CoachLink coaches and Stripe
+ * Express accounts. It handles: - Creating Stripe Express accounts for coaches
+ * - Generating onboarding links for account setup - Checking account status and
+ * onboarding progress - Creating dashboard links for account management -
+ * Synchronizing Stripe account data with local database
+ *
  * All operations maintain data consistency between Stripe and MongoDB.
  */
 @Service
@@ -57,7 +55,7 @@ public class StripeService {
 
     /**
      * Constructor for dependency injection
-     * 
+     *
      * @param coachRepository Repository for coach data operations
      */
     public StripeService(CoachRepository coachRepository) {
@@ -65,8 +63,8 @@ public class StripeService {
     }
 
     /**
-     * Initialize Stripe API with the configured API key
-     * Called before each Stripe API operation to ensure authentication
+     * Initialize Stripe API with the configured API key Called before each
+     * Stripe API operation to ensure authentication
      */
     private void initializeStripe() {
         Stripe.apiKey = stripeApiKey;
@@ -74,13 +72,11 @@ public class StripeService {
 
     /**
      * Create a new Stripe Express account for a coach
-     * 
-     * This method:
-     * 1. Creates a Stripe Express account with coach's email
-     * 2. Configures account for payment transfers
-     * 3. Saves or updates coach record in database
-     * 4. Links Stripe account ID to coach record
-     * 
+     *
+     * This method: 1. Creates a Stripe Express account with coach's email 2.
+     * Configures account for payment transfers 3. Saves or updates coach record
+     * in database 4. Links Stripe account ID to coach record
+     *
      * @param email Coach's email address
      * @param name Coach's display name
      * @return Stripe account ID
@@ -129,10 +125,10 @@ public class StripeService {
 
     /**
      * Generate an onboarding link for a Stripe Express account
-     * 
-     * This link allows coaches to complete their Stripe account setup
-     * including providing business information, bank details, and identity verification.
-     * 
+     *
+     * This link allows coaches to complete their Stripe account setup including
+     * providing business information, bank details, and identity verification.
+     *
      * @param accountId Stripe account ID
      * @return Onboarding URL for the coach to complete setup
      * @throws StripeException if Stripe API call fails
@@ -158,12 +154,10 @@ public class StripeService {
 
     /**
      * Retrieve and update account status from Stripe
-     * 
-     * This method:
-     * 1. Fetches current account status from Stripe
-     * 2. Updates local database with latest status
-     * 3. Returns complete account information
-     * 
+     *
+     * This method: 1. Fetches current account status from Stripe 2. Updates
+     * local database with latest status 3. Returns complete account information
+     *
      * @param accountId Stripe account ID
      * @return Stripe Account object with current status
      * @throws StripeException if Stripe API call fails
@@ -181,8 +175,8 @@ public class StripeService {
             coach.setPayoutsEnabled(account.getPayoutsEnabled());
             coach.setUpdatedAt(LocalDateTime.now());
             coachRepository.save(coach);
-            log.debug("Updated coach {} status: onboarding={}, payouts={}", 
-                     coach.getEmail(), account.getDetailsSubmitted(), account.getPayoutsEnabled());
+            log.debug("Updated coach {} status: onboarding={}, payouts={}",
+                    coach.getEmail(), account.getDetailsSubmitted(), account.getPayoutsEnabled());
         }
 
         return account;
@@ -190,10 +184,10 @@ public class StripeService {
 
     /**
      * Generate a dashboard link for account management
-     * 
-     * This link allows coaches to access their Stripe Express dashboard
-     * where they can view payments, update account details, and manage settings.
-     * 
+     *
+     * This link allows coaches to access their Stripe Express dashboard where
+     * they can view payments, update account details, and manage settings.
+     *
      * @param accountId Stripe account ID
      * @return Dashboard URL for account management
      * @throws StripeException if Stripe API call fails
@@ -212,7 +206,7 @@ public class StripeService {
 
     /**
      * Find a coach by email address
-     * 
+     *
      * @param email Coach's email address
      * @return Coach entity or null if not found
      */
@@ -222,7 +216,7 @@ public class StripeService {
 
     /**
      * Retrieve all coaches in the system
-     * 
+     *
      * @return List of all coach entities
      */
     public List<Coach> getAllCoaches() {

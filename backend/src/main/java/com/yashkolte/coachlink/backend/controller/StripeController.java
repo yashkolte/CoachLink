@@ -24,14 +24,11 @@ import java.util.Map;
 
 /**
  * REST Controller for Stripe Express account operations
- * 
- * This controller handles all Stripe-related operations for coaches:
- * - Account creation and registration
- * - Onboarding link generation
- * - Account status checking
- * - Dashboard link generation
- * - Email verification
- * 
+ *
+ * This controller handles all Stripe-related operations for coaches: - Account
+ * creation and registration - Onboarding link generation - Account status
+ * checking - Dashboard link generation - Email verification
+ *
  * All endpoints return responses wrapped in ApiResponse<T> for consistency.
  * CORS is enabled for frontend integration.
  */
@@ -46,13 +43,14 @@ public class StripeController {
 
     /**
      * Create or retrieve a coach's Stripe Express account
-     * 
-     * This endpoint handles both new account creation and existing account lookup.
-     * It returns different responses based on the account's onboarding status:
-     * - New accounts: Creates Stripe account and returns incomplete status
-     * - Existing complete accounts: Returns complete status for dashboard redirect
-     * - Existing incomplete accounts: Returns incomplete status for onboarding continuation
-     * 
+     *
+     * This endpoint handles both new account creation and existing account
+     * lookup. It returns different responses based on the account's onboarding
+     * status: - New accounts: Creates Stripe account and returns incomplete
+     * status - Existing complete accounts: Returns complete status for
+     * dashboard redirect - Existing incomplete accounts: Returns incomplete
+     * status for onboarding continuation
+     *
      * @param request Coach's registration information (email and name)
      * @return ApiResponse containing coach account information and status
      */
@@ -63,20 +61,20 @@ public class StripeController {
 
             // Check if email already exists in system
             Coach existingCoach = stripeService.getCoachByEmail(request.getEmail());
-            
+
             if (existingCoach != null && existingCoach.getStripeAccountId() != null) {
                 // Fetch real-time status from Stripe for existing accounts
                 Account account = stripeService.getAccountStatus(existingCoach.getStripeAccountId());
-                
+
                 CoachResponse response = new CoachResponse(
-                    existingCoach.getId(),
-                    existingCoach.getEmail(),
-                    existingCoach.getName(),
-                    existingCoach.getStripeAccountId(),
-                    account.getDetailsSubmitted() ? "complete" : "incomplete",
-                    true
+                        existingCoach.getId(),
+                        existingCoach.getEmail(),
+                        existingCoach.getName(),
+                        existingCoach.getStripeAccountId(),
+                        account.getDetailsSubmitted() ? "complete" : "incomplete",
+                        true
                 );
-                
+
                 if (account.getDetailsSubmitted()) {
                     log.info("Existing coach {} has completed onboarding", request.getEmail());
                     return ResponseEntity.ok(ApiResponse.success("Account already exists and is complete", response));
@@ -92,12 +90,12 @@ public class StripeController {
             Coach coach = stripeService.getCoachByEmail(request.getEmail());
 
             CoachResponse response = new CoachResponse(
-                coach.getId(),
-                coach.getEmail(),
-                coach.getName(),
-                coach.getStripeAccountId(),
-                "incomplete", // New accounts always start as incomplete
-                true
+                    coach.getId(),
+                    coach.getEmail(),
+                    coach.getName(),
+                    coach.getStripeAccountId(),
+                    "incomplete", // New accounts always start as incomplete
+                    true
             );
 
             return ResponseEntity.ok(ApiResponse.success("Account created successfully", response));
@@ -115,13 +113,11 @@ public class StripeController {
 
     /**
      * Generate an onboarding link for Stripe account setup
-     * 
+     *
      * This endpoint creates a temporary link that allows coaches to complete
-     * their Stripe Express account onboarding process, including:
-     * - Business information
-     * - Bank account details
-     * - Identity verification
-     * 
+     * their Stripe Express account onboarding process, including: - Business
+     * information - Bank account details - Identity verification
+     *
      * @param request Map containing the Stripe account ID
      * @return ApiResponse containing the onboarding URL
      */
@@ -148,11 +144,11 @@ public class StripeController {
 
     /**
      * Check the current status of a Stripe Express account
-     * 
+     *
      * This endpoint retrieves real-time account information from Stripe,
-     * including onboarding completion status and payout availability.
-     * It also updates the local database with the latest status.
-     * 
+     * including onboarding completion status and payout availability. It also
+     * updates the local database with the latest status.
+     *
      * @param accountId Stripe account ID to check
      * @return ApiResponse containing account status information
      */
@@ -161,14 +157,14 @@ public class StripeController {
         try {
             log.info("Checking status for Stripe account: {}", accountId);
             Account account = stripeService.getAccountStatus(accountId);
-            
+
             Map<String, Object> status = Map.of(
-                "accountId", accountId,
-                "detailsSubmitted", account.getDetailsSubmitted(),
-                "payoutsEnabled", account.getPayoutsEnabled(),
-                "onboardingComplete", account.getDetailsSubmitted()
+                    "accountId", accountId,
+                    "detailsSubmitted", account.getDetailsSubmitted(),
+                    "payoutsEnabled", account.getPayoutsEnabled(),
+                    "onboardingComplete", account.getDetailsSubmitted()
             );
-            
+
             return ResponseEntity.ok(ApiResponse.success(status));
 
         } catch (StripeException e) {
@@ -180,14 +176,12 @@ public class StripeController {
 
     /**
      * Generate a dashboard link for Stripe Express account management
-     * 
+     *
      * This endpoint creates a temporary link that allows coaches to access
-     * their Stripe Express dashboard where they can:
-     * - View payment history
-     * - Update account settings
-     * - Manage business information
-     * - View payout details
-     * 
+     * their Stripe Express dashboard where they can: - View payment history -
+     * Update account settings - Manage business information - View payout
+     * details
+     *
      * @param accountId Stripe account ID
      * @return ApiResponse containing the dashboard URL
      */
@@ -207,11 +201,11 @@ public class StripeController {
 
     /**
      * Check if an email address is registered in the system
-     * 
-     * This endpoint verifies whether a coach with the given email exists
-     * in the database and returns their current registration and onboarding status.
+     *
+     * This endpoint verifies whether a coach with the given email exists in the
+     * database and returns their current registration and onboarding status.
      * Used by the frontend to determine the appropriate user flow.
-     * 
+     *
      * @param email Email address to check
      * @return ApiResponse containing coach information or unregistered status
      */
@@ -220,7 +214,7 @@ public class StripeController {
         try {
             log.info("Checking email registration status: {}", email);
             Coach coach = stripeService.getCoachByEmail(email);
-            
+
             if (coach == null) {
                 // Email not registered in system
                 CoachResponse response = new CoachResponse(null, email, null, null, "not_registered", false);
@@ -229,14 +223,14 @@ public class StripeController {
 
             // Email is registered, return current status
             CoachResponse response = new CoachResponse(
-                coach.getId(),
-                coach.getEmail(),
-                coach.getName(),
-                coach.getStripeAccountId(),
-                coach.getOnboardingComplete() ? "complete" : "incomplete",
-                true
+                    coach.getId(),
+                    coach.getEmail(),
+                    coach.getName(),
+                    coach.getStripeAccountId(),
+                    coach.getOnboardingComplete() ? "complete" : "incomplete",
+                    true
             );
-            
+
             return ResponseEntity.ok(ApiResponse.success(response));
 
         } catch (Exception e) {

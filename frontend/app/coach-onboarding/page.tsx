@@ -36,7 +36,7 @@ export default function CoachOnboarding() {
   useEffect(() => {
     const returnFromStripe = searchParams.get('return');
     const accountId = searchParams.get('account_id');
-    
+
     if (returnFromStripe === 'true' && accountId) {
       handleOnboardingReturn(accountId);
     }
@@ -47,11 +47,11 @@ export default function CoachOnboarding() {
     try {
       // Check account status after return from Stripe
       const statusResponse = await stripeApi.checkAccountStatus(accountId);
-      
+
       if (statusResponse.onboardingComplete) {
         setStep('complete');
         setCoachData(prev => prev ? { ...prev, status: 'complete' } : null);
-        
+
         // Generate dashboard link
         const dashboardResponse = await stripeApi.getDashboardLink(accountId);
         setDashboardUrl(dashboardResponse.dashboardUrl);
@@ -77,11 +77,11 @@ export default function CoachOnboarding() {
 
     setLoading(true);
     setError('');
-    
+
     try {
       // Step 1: Check if email is already registered
       const emailCheck = await stripeApi.checkEmailRegistration(formData.email);
-      
+
       if (emailCheck.isRegistered) {
         // Existing coach
         setCoachData({
@@ -118,7 +118,7 @@ export default function CoachOnboarding() {
 
   const createNewAccount = async () => {
     setStep('creating');
-    
+
     try {
       // Step 2: Create Stripe Express account
       const accountResponse = await stripeApi.createAccount({
@@ -143,14 +143,14 @@ export default function CoachOnboarding() {
 
   const startOnboarding = async () => {
     if (!coachData?.accountId) return;
-    
+
     setLoading(true);
     try {
       // Step 3: Generate onboarding link
       const onboardingResponse = await stripeApi.generateOnboardingLink({
         accountId: coachData.accountId
       });
-      
+
       // Redirect to Stripe onboarding
       window.location.href = onboardingResponse.onboardingUrl;
     } catch (err) {
@@ -168,32 +168,29 @@ export default function CoachOnboarding() {
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8 space-x-4">
       <div className={`flex items-center ${step === 'signup' || step === 'creating' ? 'text-blue-600' : 'text-green-600'}`}>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-          step === 'signup' || step === 'creating' ? 'bg-blue-100 border-2 border-blue-600' : 'bg-green-100'
-        }`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'signup' || step === 'creating' ? 'bg-blue-100 border-2 border-blue-600' : 'bg-green-100'
+          }`}>
           {step === 'signup' || step === 'creating' ? <UserPlus size={16} /> : <CheckCircle size={16} />}
         </div>
         <span className="ml-2 text-sm font-medium">Sign Up</span>
       </div>
-      
+
       <div className={`w-8 h-1 ${step === 'onboarding' || step === 'complete' || step === 'dashboard' ? 'bg-green-300' : 'bg-gray-300'}`} />
-      
+
       <div className={`flex items-center ${step === 'onboarding' ? 'text-blue-600' : step === 'complete' || step === 'dashboard' ? 'text-green-600' : 'text-gray-400'}`}>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-          step === 'onboarding' ? 'bg-blue-100 border-2 border-blue-600' : 
-          step === 'complete' || step === 'dashboard' ? 'bg-green-100' : 'bg-gray-100'
-        }`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'onboarding' ? 'bg-blue-100 border-2 border-blue-600' :
+            step === 'complete' || step === 'dashboard' ? 'bg-green-100' : 'bg-gray-100'
+          }`}>
           {step === 'complete' || step === 'dashboard' ? <CheckCircle size={16} /> : <CreditCard size={16} />}
         </div>
         <span className="ml-2 text-sm font-medium">Setup Payments</span>
       </div>
-      
+
       <div className={`w-8 h-1 ${step === 'dashboard' ? 'bg-green-300' : 'bg-gray-300'}`} />
-      
+
       <div className={`flex items-center ${step === 'dashboard' ? 'text-green-600' : 'text-gray-400'}`}>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-          step === 'dashboard' ? 'bg-green-100' : 'bg-gray-100'
-        }`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'dashboard' ? 'bg-green-100' : 'bg-gray-100'
+          }`}>
           <ExternalLink size={16} />
         </div>
         <span className="ml-2 text-sm font-medium">Dashboard</span>
@@ -332,8 +329,8 @@ export default function CoachOnboarding() {
               <Button onClick={openDashboard} className="w-full bg-green-600 hover:bg-green-700">
                 Open Stripe Dashboard
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full"
                 onClick={() => window.location.href = '/'}
               >
