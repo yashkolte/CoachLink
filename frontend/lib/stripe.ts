@@ -26,7 +26,7 @@ class StripeApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = `${API_BASE_URL}/stripe`;
+    this.baseURL = `${API_BASE_URL}/coaches`;
   }
 
   async createAccount(data: CoachRequest): Promise<CoachResponse> {
